@@ -4,6 +4,8 @@
 
 対応する GREE+ エアコンを Home Assistant に接続します。
 
+> **HACS での公開状況:** このリポジトリはまだ HACS の標準カタログに掲載されていません。インストールするには、**HACS > Integrations > ⋮ > Custom repositories** で `https://github.com/Gdeveloper-code/home-assistant-gree-plus` を追加し、**Integration** を選択して **Add** をクリックしてください。
+
 ## 機能
 
 - 電源、運転モード、目標温度、ファン速度の制御。

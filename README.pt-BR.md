@@ -4,6 +4,8 @@
 
 Conecte aparelhos de ar-condicionado GREE+ compatíveis ao Home Assistant.
 
+> **Disponibilidade no HACS:** Este repositório ainda não está no catálogo padrão do HACS. Adicione `https://github.com/Gdeveloper-code/home-assistant-gree-plus` em **HACS > Integrations > ⋮ > Custom repositories**, selecione **Integration** e clique em **Add**.
+
 ## Recursos
 
 - Controle de energia, modo HVAC, temperatura desejada e velocidade do ventilador.

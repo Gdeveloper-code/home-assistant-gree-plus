@@ -20,6 +20,8 @@ Connect supported GREE+ air conditioners to Home Assistant.
 
 > Cloud service availability may change or be interrupted.
 
+> **HACS availability:** This repository is not yet listed in the HACS default catalog. To install it, add `https://github.com/Gdeveloper-code/home-assistant-gree-plus` under **HACS > Integrations > ⋮ > Custom repositories**, select **Integration**, and click **Add**.
+
 ## Supported Controls
 
 | Capability | Support | Notes |

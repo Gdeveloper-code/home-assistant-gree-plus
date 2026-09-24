@@ -4,6 +4,8 @@
 
 지원되는 GREE+ 에어컨을 Home Assistant에 연결합니다.
 
+> **HACS 등록 상태:** 이 저장소는 아직 HACS 기본 카탈로그에 등록되지 않았습니다. 설치하려면 **HACS > Integrations > ⋮ > Custom repositories**에서 `https://github.com/Gdeveloper-code/home-assistant-gree-plus`를 추가하고 **Integration**을 선택한 다음 **Add**를 누르세요.
+
 ## 기능
 
 - 전원, HVAC 모드, 목표 온도 및 팬 속도 제어.

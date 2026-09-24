@@ -4,6 +4,8 @@
 
 Connectez les climatiseurs GREE+ pris en charge à Home Assistant.
 
+> **Disponibilité dans HACS :** Ce dépôt ne figure pas encore dans le catalogue par défaut de HACS. Ajoutez `https://github.com/Gdeveloper-code/home-assistant-gree-plus` dans **HACS > Integrations > ⋮ > Custom repositories**, sélectionnez **Integration**, puis cliquez sur **Add**.
+
 ## Fonctionnalités
 
 - Commande de l’alimentation, du mode HVAC, de la température cible et de la vitesse de ventilation.

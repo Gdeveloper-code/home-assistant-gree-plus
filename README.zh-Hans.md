@@ -4,6 +4,8 @@
 
 将受支持的 GREE+ 空调接入 Home Assistant。
 
+> **HACS 收录状态：** 本仓库尚未进入 HACS 默认目录。安装时请打开 **HACS > Integrations > ⋮ > Custom repositories**，添加 `https://github.com/Gdeveloper-code/home-assistant-gree-plus`，类型选择 **Integration**，然后点击 **Add**。
+
 ## 功能
 
 - 控制开关、运行模式、目标温度和风速。
