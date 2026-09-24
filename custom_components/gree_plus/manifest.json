@@ -12,5 +12,5 @@
   "loggers": [
     "homeassistant.components.gree_plus.gree_plus_protocol"
   ],
-  "version": "0.1.2"
+  "version": "0.1.1"
 }

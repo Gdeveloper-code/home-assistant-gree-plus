@@ -1,11 +1,5 @@
 # Changelog
 
-## [0.1.2] - 2026-09-24
-
-### Fixed
-
-- Updated documentation and issue tracker links to the current repository name.
-
 ## [0.1.1] - 2026-09-15
 
 ### Added
