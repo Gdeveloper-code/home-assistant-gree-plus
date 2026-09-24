@@ -5,7 +5,7 @@
 <h1 align="center">Gree Plus for Home Assistant</h1>
 
 <p align="center">
-  An unofficial cloud integration for supported GREE+ air conditioners.
+  Home Assistant integration for supported GREE+ air conditioners.
 </p>
 
 <p align="center">
@@ -16,10 +16,9 @@
 
 [English](README.md) | [German](README.de.md) | [Spanish](README.es.md) | [French](README.fr.md) | [Brazilian Portuguese](README.pt-BR.md) | [Japanese](README.ja.md) | [Korean](README.ko.md) | [Simplified Chinese](README.zh-Hans.md) | [Traditional Chinese](README.zh-Hant.md)
 
-Gree Plus is an unofficial, community-maintained Home Assistant integration for technology enthusiasts. It connects supported GREE+ air conditioners to Home Assistant through the user's GREE+ cloud account.
+Connect supported GREE+ air conditioners to Home Assistant.
 
-> [!IMPORTANT]
-> This project is not an official GREE product. It depends on a cloud service that may change or become unavailable.
+> Cloud service availability may change or be interrupted.
 
 ## Supported Controls
 

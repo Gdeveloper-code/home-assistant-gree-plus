@@ -2,7 +2,7 @@
 
 [English](README.md) | [Deutsch](README.de.md) | [Español](README.es.md) | [Français](README.fr.md) | [Português (Brasil)](README.pt-BR.md) | [日本語](README.ja.md) | [한국어](README.ko.md) | [简体中文](README.zh-Hans.md) | [繁體中文](README.zh-Hant.md)
 
-Gree Plus 是一個非官方、由社群維護的 Home Assistant 整合，面向技術愛好者。它透過使用者的 GREE+ 雲端帳戶，將受支援的 GREE+ 空調接入 Home Assistant。
+將受支援的 GREE+ 空調接入 Home Assistant。
 
 ## 功能
 

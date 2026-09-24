@@ -2,7 +2,7 @@
 
 [English](README.md) | [Deutsch](README.de.md) | [Español](README.es.md) | [Français](README.fr.md) | [Português (Brasil)](README.pt-BR.md) | [日本語](README.ja.md) | [한국어](README.ko.md) | [简体中文](README.zh-Hans.md) | [繁體中文](README.zh-Hant.md)
 
-Gree Plus는 기술 애호가를 위해 커뮤니티에서 관리하는 비공식 Home Assistant 통합입니다. 사용자의 GREE+ 클라우드 계정을 통해 지원되는 GREE+ 에어컨을 Home Assistant에 연결합니다.
+지원되는 GREE+ 에어컨을 Home Assistant에 연결합니다.
 
 ## 기능
 

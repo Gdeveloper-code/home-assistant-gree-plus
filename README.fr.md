@@ -2,7 +2,7 @@
 
 [English](README.md) | [Deutsch](README.de.md) | [Español](README.es.md) | [Français](README.fr.md) | [Português (Brasil)](README.pt-BR.md) | [日本語](README.ja.md) | [한국어](README.ko.md) | [简体中文](README.zh-Hans.md) | [繁體中文](README.zh-Hant.md)
 
-Gree Plus est une intégration Home Assistant non officielle, maintenue par la communauté et destinée aux passionnés de technologie. Elle connecte les climatiseurs GREE+ compatibles à Home Assistant au moyen du compte cloud GREE+ de l’utilisateur.
+Connectez les climatiseurs GREE+ pris en charge à Home Assistant.
 
 ## Fonctionnalités
 
