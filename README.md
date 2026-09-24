@@ -11,7 +11,7 @@
 <p align="center">
   <img alt="Home Assistant 2026.9.1+" src="https://img.shields.io/badge/Home%20Assistant-2026.9.1%2B-41BDF5?logo=home-assistant&logoColor=white">
   <img alt="HACS custom integration" src="https://img.shields.io/badge/HACS-Custom-41BDF5">
-  <img alt="Release 0.1.1" src="https://img.shields.io/badge/Release-0.1.1-blue">
+  <img alt="Release 0.1.2" src="https://img.shields.io/badge/Release-0.1.2-blue">
 </p>
 
 [English](README.md) | [German](README.de.md) | [Spanish](README.es.md) | [French](README.fr.md) | [Brazilian Portuguese](README.pt-BR.md) | [Japanese](README.ja.md) | [Korean](README.ko.md) | [Simplified Chinese](README.zh-Hans.md) | [Traditional Chinese](README.zh-Hant.md)
