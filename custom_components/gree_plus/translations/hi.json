@@ -1,4 +1,15 @@
 {
+  "exceptions": {
+    "authentication_failed": {
+      "message": "खाते की अनुमति समाप्त हो गई है या अस्वीकार कर दी गई है। जारी रखने के लिए फिर से साइन इन करें।"
+    },
+    "command_failed": {
+      "message": "डिवाइस को नियंत्रित नहीं किया जा सका: {message}"
+    },
+    "communication_failed": {
+      "message": "क्लाउड सेवा से संपर्क नहीं हो सका। बाद में फिर से प्रयास करें।"
+    }
+  },
   "entity": {
     "climate": {
       "air_conditioner": {

@@ -1,4 +1,15 @@
 {
+  "exceptions": {
+    "authentication_failed": {
+      "message": "De accountautorisatie is verlopen of geweigerd. Meld je opnieuw aan om door te gaan."
+    },
+    "command_failed": {
+      "message": "Het apparaat kan niet worden bediend: {message}"
+    },
+    "communication_failed": {
+      "message": "Kan niet communiceren met de clouddienst. Probeer het later opnieuw."
+    }
+  },
   "entity": {
     "climate": {
       "air_conditioner": {

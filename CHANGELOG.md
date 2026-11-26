@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.1.2] - 2026-11-18
+
+### Fixed
+
+- Request sign-in again when account authorization expires or is rejected.
+- Keep temporary connection failures recoverable without requesting sign-in.
+- Show translated errors when device commands fail.
+- Remove account identifiers from downloaded diagnostics.
+- Replace the inactive token repair prompt with Home Assistant reauthentication.
+- Correct release metadata and logging configuration.
+
 ## [0.1.1] - 2026-09-15
 
 ### Added

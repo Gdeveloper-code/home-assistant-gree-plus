@@ -1,4 +1,15 @@
 {
+  "exceptions": {
+    "authentication_failed": {
+      "message": "계정 인증이 만료되었거나 거부되었습니다. 계속하려면 다시 로그인하세요."
+    },
+    "command_failed": {
+      "message": "기기를 제어할 수 없습니다: {message}"
+    },
+    "communication_failed": {
+      "message": "클라우드 서비스와 통신할 수 없습니다. 나중에 다시 시도하세요."
+    }
+  },
   "entity": {
     "climate": {
       "air_conditioner": {

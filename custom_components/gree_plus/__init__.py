@@ -10,8 +10,9 @@ forwards to ``coordinator.async_request_refresh``).
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import EVENT_CORE_CONFIG_UPDATE, Platform
 from homeassistant.core import Event, HomeAssistant
-from homeassistant.helpers import entity_registry as er
+from homeassistant.helpers import entity_registry as er, issue_registry as ir
 
+from .const import DOMAIN
 from .coordinator import GRCoordinator
 
 PLATFORMS: list[Platform] = [Platform.BUTTON, Platform.CLIMATE]
@@ -25,6 +26,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: GreePlusConfigEntry) -> 
     Creates the coordinator, performs the initial on-demand device/state fetch
     (so entities have state immediately after setup), and forwards the platforms.
     """
+    ir.async_delete_issue(hass, DOMAIN, "token_refresh_failed")
     coordinator = GRCoordinator(hass, entry)
     await coordinator.async_load_fan_capabilities()
     await coordinator.async_config_entry_first_refresh()

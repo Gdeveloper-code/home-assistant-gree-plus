@@ -21,6 +21,7 @@ Usage (from within the integration)::
 
 from .GRConst import OP_CLIENT_ID, OP_CLIENT_SECRET
 from .GROauthControl import (
+    GreeOAuthAuthenticationError,
     GreeOAuthError,
     GROauthControl,
     OAuthInteractionRequired,
@@ -47,6 +48,7 @@ __all__ = [
     "DeviceDetail",
     "GROauthControl",
     "GRStandardCloud",
+    "GreeOAuthAuthenticationError",
     "GreeOAuthError",
     "GreeStandardCloudError",
     "OAuthInteractionRequired",

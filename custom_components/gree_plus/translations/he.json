@@ -1,4 +1,15 @@
 {
+  "exceptions": {
+    "authentication_failed": {
+      "message": "הרשאת החשבון פגה או נדחתה. יש להתחבר שוב כדי להמשיך."
+    },
+    "command_failed": {
+      "message": "לא ניתן לשלוט במכשיר: {message}"
+    },
+    "communication_failed": {
+      "message": "לא ניתן לתקשר עם שירות הענן. יש לנסות שוב מאוחר יותר."
+    }
+  },
   "entity": {
     "climate": {
       "air_conditioner": {

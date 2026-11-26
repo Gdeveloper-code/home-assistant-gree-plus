@@ -1,4 +1,4 @@
-"""Cloud client for the Gree Plus integration."""
+"""Asynchronous device discovery, status queries, and control."""
 
 from dataclasses import dataclass, field
 import hashlib
@@ -17,7 +17,12 @@ _REQUEST_TIMEOUT = ClientTimeout(total=10.0)
 
 
 class GreeStandardCloudError(Exception):
-    """Raised when a cloud request fails."""
+    """Raised when the standard-cloud API returns a non-200 code.
+
+    ``code`` carries the API error code (e.g. 101 auth, 105 bad device,
+    601 offline) so callers can react (e.g. 101 → token refresh, 601/602 →
+    mark entity unavailable).
+    """
 
     def __init__(self, code: int, message: str) -> None:
         """Store the API code + message."""
@@ -96,7 +101,16 @@ def _parse_detail(raw: dict[str, Any] | None) -> DeviceDetail:
 
 
 def _parse_temperature(state: dict[str, Any]) -> tuple[float | None, str]:
-    """Return the reported temperature and unit."""
+    """Parse flat temperature fields → (value, temUnit).
+
+    In the query response all temperature fields are top-level siblings:
+    ``temperature`` (integer string), ``addPointFiveValue`` (0/1 → append
+    ".5"), ``temUnit`` (C/F). Fahrenheit has no decimal part; Celsius only
+    looks at the 0.5 flag. ``addPointOneValue`` never shifts the value: the
+    cloud snaps non-.5 tenths back to the integer, and devices that accept
+    0.5 control via ``addPointOneValue=5`` echo ``addPointFiveValue=1`` in
+    the query state anyway.
+    """
     base = state.get("temperature")
     unit = state.get("temUnit", "C") or "C"
     if base is None:
@@ -126,7 +140,7 @@ def _parse_state(raw: dict[str, Any] | None) -> DevState | None:
 
 
 class GRStandardCloud:
-    """Cloud API client."""
+    """Client for the Gree open-platform standard-cloud smarthome API."""
 
     def __init__(
         self,
@@ -134,7 +148,14 @@ class GRStandardCloud:
         access_token: str,
         region: str | None = None,
     ) -> None:
-        """Initialize the cloud client."""
+        """Initialize the standard-cloud client.
+
+        Args:
+            session: HA's shared aiohttp ClientSession.
+            access_token: The OAuth2 access_token used as Bearer. Mutable via
+                :attr:`access_token` so the coordinator can refresh in place.
+            region: Region key for host resolution (None → default/test).
+        """
         self._session = session
         self._access_token = access_token
         self._host: OpenPlatformHost = get_openplatform_host(region)
@@ -155,7 +176,12 @@ class GRStandardCloud:
         return f"https://{self._host.host}"
 
     async def _post(self, namespace: str, payload: dict[str, Any] | None = None) -> Any:
-        """Send a cloud request and return its data."""
+        """POST one smarthome request and return the ``data`` field.
+
+        Raises:
+            GreeStandardCloudError: on network error, non-200 HTTP, or API code
+                != 200.
+        """
         url = f"{self.base_url}{_SMARTHOME_PATH}"
         body: dict[str, Any] = {
             "requestId": uuid.uuid4().hex,
@@ -164,9 +190,11 @@ class GRStandardCloud:
         }
         if payload is not None:
             body["payload"] = payload
-        # Keep serialization stable for request signing.
+        # Serialize compactly — the sign must match the exact bytes sent.
         body_str = json.dumps(body, separators=(",", ":"), ensure_ascii=False)
         sign = hashlib.md5((body_str + OP_CLIENT_SECRET).encode()).hexdigest().upper()
+        # NOTE: do NOT send the `userid` header — the server derives the user
+        # from the Bearer token; sending userid fails the identity check.
         headers = {
             "Authorization": f"Bearer {self._access_token}",
             "appid": OP_CLIENT_ID,
@@ -189,7 +217,11 @@ class GRStandardCloud:
         return result.get("data")
 
     async def get_devices(self) -> list[Device]:
-        """Return supported devices."""
+        """Enumerate the user's devices (namespace=deviceList).
+
+        Only ``ac`` and ``multiAc`` types are returned; others are filtered out
+        (heater etc. are out of scope for this integration).
+        """
         data = await self._post("deviceList")
         devices: list[Device] = []
         for item in data or []:
@@ -208,7 +240,11 @@ class GRStandardCloud:
         return devices
 
     async def query(self, device_ids: list[str]) -> dict[str, QueryResult]:
-        """Return the current state of the requested devices."""
+        """Fetch state for a batch of devices (namespace=query).
+
+        Returns a dict keyed by device id. A device that is offline or has no
+        state maps to a ``QueryResult`` with ``state=None``.
+        """
         if not device_ids:
             return {}
         data = await self._post(
@@ -227,7 +263,12 @@ class GRStandardCloud:
         return result
 
     async def control(self, device_id: str, cmd: dict[str, Any]) -> None:
-        """Send a control command to one device."""
+        """Send a control command to one device (namespace=singleDeviceControl).
+
+        Raises:
+            GreeStandardCloudError: if the API reports ``done`` is false or a
+                non-null ``error`` (e.g. 601 offline, 602 timeout, 107 bad value).
+        """
         data = await self._post(
             "singleDeviceControl",
             {"id": device_id, "cmd": cmd},

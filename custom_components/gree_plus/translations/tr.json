@@ -1,4 +1,15 @@
 {
+  "exceptions": {
+    "authentication_failed": {
+      "message": "Hesap yetkilendirmesinin süresi doldu veya reddedildi. Devam etmek için yeniden oturum açın."
+    },
+    "command_failed": {
+      "message": "Cihaz kontrol edilemiyor: {message}"
+    },
+    "communication_failed": {
+      "message": "Bulut hizmetiyle iletişim kurulamıyor. Daha sonra tekrar deneyin."
+    }
+  },
   "entity": {
     "climate": {
       "air_conditioner": {

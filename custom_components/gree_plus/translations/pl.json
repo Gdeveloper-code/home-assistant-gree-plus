@@ -1,4 +1,15 @@
 {
+  "exceptions": {
+    "authentication_failed": {
+      "message": "Autoryzacja konta wygasła lub została odrzucona. Zaloguj się ponownie, aby kontynuować."
+    },
+    "command_failed": {
+      "message": "Nie można sterować urządzeniem: {message}"
+    },
+    "communication_failed": {
+      "message": "Nie można połączyć się z usługą w chmurze. Spróbuj ponownie później."
+    }
+  },
   "entity": {
     "climate": {
       "air_conditioner": {

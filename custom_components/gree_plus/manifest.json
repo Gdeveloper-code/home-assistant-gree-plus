@@ -10,7 +10,7 @@
   "iot_class": "cloud_polling",
   "issue_tracker": "https://github.com/Gdeveloper-code/home-assistant-gree-plus/issues",
   "loggers": [
-    "homeassistant.components.gree_plus.gree_plus_protocol"
+    "custom_components.gree_plus"
   ],
-  "version": "0.1.1"
+  "version": "0.1.2"
 }

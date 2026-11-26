@@ -1,4 +1,15 @@
 {
+  "exceptions": {
+    "authentication_failed": {
+      "message": "Авторизация учётной записи истекла или была отклонена. Войдите снова, чтобы продолжить."
+    },
+    "command_failed": {
+      "message": "Не удалось управлять устройством: {message}"
+    },
+    "communication_failed": {
+      "message": "Не удалось связаться с облачным сервисом. Повторите попытку позже."
+    }
+  },
   "entity": {
     "climate": {
       "air_conditioner": {

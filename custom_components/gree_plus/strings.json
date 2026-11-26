@@ -115,6 +115,15 @@
     "auto_mode_no_temperature": {
       "message": "The temperature cannot be adjusted in auto mode on this device."
     },
+    "authentication_failed": {
+      "message": "Account authorization has expired or was rejected. Sign in again to continue."
+    },
+    "command_failed": {
+      "message": "Unable to control the device: {message}"
+    },
+    "communication_failed": {
+      "message": "Unable to communicate with the cloud service. Try again later."
+    },
     "device_offline": {
       "message": "The device is offline or did not respond: {message}"
     },
@@ -126,10 +135,6 @@
     "no_devices": {
       "description": "No compatible devices were found on your Gree account. Make sure your devices use the same account that was used to log in.",
       "title": "No devices found"
-    },
-    "token_refresh_failed": {
-      "description": "Gree Plus was unable to refresh your access token. Please re-enter your account credentials to restore access.\n\nTo fix this issue, use the **Reconfigure** option on the integration card.",
-      "title": "Token refresh failed"
     }
   }
 }

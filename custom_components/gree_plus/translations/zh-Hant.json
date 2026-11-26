@@ -1,4 +1,15 @@
 {
+  "exceptions": {
+    "authentication_failed": {
+      "message": "帳號授權已過期或遭拒絕。請重新登入以繼續使用。"
+    },
+    "command_failed": {
+      "message": "無法控制裝置：{message}"
+    },
+    "communication_failed": {
+      "message": "無法連線至雲端服務，請稍後再試。"
+    }
+  },
   "config": {
     "abort": {
       "already_configured": "此帳號已設定",

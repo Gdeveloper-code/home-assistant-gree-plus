@@ -7,9 +7,7 @@ from homeassistant.core import HomeAssistant
 
 from . import GreePlusConfigEntry
 
-# Sensitive fields stored in the config entry — never expose them in a
-# diagnostics download. ``name``/``title`` carry the Gree account display name
-# (often the registered phone number), so they are personal data too.
+# Redact credentials and account identifiers, including entry metadata.
 TO_REDACT = frozenset(
     {
         "access_token",
@@ -17,6 +15,7 @@ TO_REDACT = frozenset(
         "open_id",
         "name",
         "title",
+        "unique_id",
     }
 )
 

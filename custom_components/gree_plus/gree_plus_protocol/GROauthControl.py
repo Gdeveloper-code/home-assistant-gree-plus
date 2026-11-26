@@ -1,4 +1,4 @@
-"""OAuth client for the Gree Plus integration."""
+"""Asynchronous account authorization and token management."""
 
 import base64
 from dataclasses import dataclass
@@ -12,10 +12,12 @@ from aiohttp import ClientError, ClientSession, ClientTimeout
 
 from .GRConst import OP_CLIENT_ID, OP_CLIENT_SECRET
 
+# Fixed by the OAuth2 spec + the registered app.
 REDIRECT_URI = "http://localhost/"
 _AUTHORIZE_PATH = "/oauth/oauth2/gree/authorize"
 _TOKEN_PATH = "/oauth/oauth2/token"
 _USERINFO_PATH = "/oauth/oauth2/userinfo"
+# Login-flow endpoints.
 _LOGIN_PATH = "/oauth/oauth2/gree/tellogin"
 _AUTH_PAGE_PATH = "/oauth/oauth2/gree/auth"
 _GRANT_TYPE_AUTH_CODE = "authorization_code"
@@ -33,7 +35,12 @@ def _md5(value: str) -> str:
 async def _follow_until_redirect(
     session: ClientSession, url: str, method: str, data: Any = None
 ) -> str | None:
-    """Return an authorization code from a redirect chain."""
+    """Follow redirect chain by reading Location headers (not actually redirecting).
+
+    aiohttp blocks redirects to localhost by default, so we manually read the
+    Location header and parse the code without following the redirect.
+    Returns ``None`` on any failure.
+    """
     target_host = urlparse(REDIRECT_URI).hostname
     for _ in range(_REDIRECT_FOLLOW_LIMIT):
         if method == "POST":
@@ -48,12 +55,15 @@ async def _follow_until_redirect(
         if status not in (301, 302, 303, 307, 308):
             return None
 
+        # Parse the Location URL and check if it matches our target
         next_url = urljoin(url, location)
         parsed = urlparse(next_url)
 
         if (parsed.hostname or "") == target_host:
+            # Extract code from query params
             return parse_qs(parsed.query).get("code", [None])[0]
 
+        # Continue following the redirect chain (POST becomes GET after 302)
         url = next_url
         method = "GET"
         data = None
@@ -65,20 +75,33 @@ class GreeOAuthError(Exception):
     """Raised when the OAuth2 token/userinfo endpoint fails."""
 
 
+class GreeOAuthAuthenticationError(GreeOAuthError):
+    """Raised when account authorization is rejected."""
+
+
 class OAuthInteractionRequired(GreeOAuthError):
     """Raised when login must be completed in the user's browser."""
 
 
 @dataclass(frozen=True)
 class OpenPlatformHost:
-    """Regional service configuration."""
+    """A Gree open-platform regional host.
+
+    ``region`` is the key the user picks at login; ``host`` is the
+    ``openplatform-<area>.gree.com`` base the authorize/token/smarthome
+    endpoints live on; ``name`` is the human-readable label for the dropdown.
+    """
 
     region: str
     host: str
     name: str
 
 
-# Supported account regions.
+# Region → open-platform host. The user picks a region at login; that single
+# choice determines the host for authorize/token/userinfo AND the
+# standard-cloud smarthome endpoint. No routing code is involved.
+# ``name`` is an English label shown in the config-flow dropdown (the protocol
+# layer has no access to HA translations).
 _OPENPLATFORM_HOSTS: dict[str, OpenPlatformHost] = {
     "na": OpenPlatformHost("na", "openplatform-na.gree.com", "North America"),
     "sa": OpenPlatformHost("sa", "openplatform-sa.gree.com", "South America"),
@@ -165,7 +188,19 @@ class GROauthControl:
         return f"{self.base_url}{_AUTHORIZE_PATH}?{urlencode(params)}"
 
     async def capture_code(self, account: str, password: str) -> str:
-        """Authenticate the account and return an authorization code."""
+        """Simulate the browser login flow and capture an authorization code.
+
+        Args:
+            account: The Gree account username (phone / email / Gree ID).
+            password: The Gree account password (plaintext; hashed in transit).
+
+        Returns:
+            The captured authorization ``code``.
+
+        Raises:
+            GreeOAuthError: if login fails, the server rejects credentials, or
+                the redirect chain doesn't yield a code (e.g. captcha gate).
+        """
         authorize_url = (
             f"{self.base_url}{_AUTHORIZE_PATH}?client_id={OP_CLIENT_ID}"
             f"&response_type=code&redirect_uri={quote(REDIRECT_URI, safe='')}"
@@ -231,7 +266,7 @@ class GROauthControl:
         return code
 
     def _basic_auth_header(self) -> str:
-        """Build the OAuth client authorization header."""
+        """Build the token request authorization header."""
         raw = f"{OP_CLIENT_ID}:{OP_CLIENT_SECRET}".encode()
         return "Basic " + base64.b64encode(raw).decode()
 
@@ -245,7 +280,7 @@ class GROauthControl:
         )
 
     async def _request_token(self, body: dict[str, str]) -> TokenInfo:
-        """Request and parse a token response."""
+        """POST to the OAuth2 token endpoint with Basic auth, return TokenInfo."""
         url = f"{self.base_url}{_TOKEN_PATH}"
         headers = {
             "Content-Type": "application/x-www-form-urlencoded",
@@ -255,11 +290,24 @@ class GROauthControl:
             async with self._session.post(
                 url, data=body, headers=headers, timeout=_REQUEST_TIMEOUT
             ) as resp:
+                if resp.status in (400, 401):
+                    raise GreeOAuthAuthenticationError(
+                        f"Token authorization rejected (HTTP {resp.status})"
+                    )
                 if resp.status != 200:
                     raise GreeOAuthError(f"token endpoint returned HTTP {resp.status}")
                 payload = await resp.json()
-        except ClientError as err:
-            raise GreeOAuthError(f"token endpoint request failed: {err}") from err
+        except (ClientError, ValueError) as err:
+            raise GreeOAuthError("Token endpoint request failed") from err
+
+        if isinstance(payload, dict) and payload.get("error") in (
+            "invalid_grant",
+            "invalid_token",
+            "invalid_client",
+            "unauthorized_client",
+            "access_denied",
+        ):
+            raise GreeOAuthAuthenticationError("Token authorization rejected")
 
         try:
             return TokenInfo(
@@ -273,7 +321,14 @@ class GROauthControl:
             raise GreeOAuthError("malformed token response") from err
 
     async def exchange_code(self, code: str) -> TokenInfo:
-        """Exchange an authorization code for a token pair."""
+        """Trade an authorization code for a token pair.
+
+        Args:
+            code: The ``code`` from the authorize redirect.
+
+        Raises:
+            GreeOAuthError: on network error, non-200, or malformed response.
+        """
         return await self._request_token(
             {
                 "grant_type": _GRANT_TYPE_AUTH_CODE,
@@ -283,7 +338,15 @@ class GROauthControl:
         )
 
     async def refresh(self, refresh_token: str) -> TokenInfo:
-        """Refresh an expired access token."""
+        """Refresh an expired access token using a refresh token.
+
+        Refresh tokens are valid 180 days (spec §3.1). The response shape is the
+        same as :meth:`exchange_code`. Note: refresh **rotates** the
+        refresh_token — the returned one must replace the stored one.
+
+        Raises:
+            GreeOAuthError: on network error, non-200, or malformed response.
+        """
         return await self._request_token(
             {
                 "grant_type": _GRANT_TYPE_REFRESH,
@@ -292,7 +355,14 @@ class GROauthControl:
         )
 
     async def user_info(self, access_token: str) -> UserInfo:
-        """Return the account identity."""
+        """Fetch user identity via the userInfo endpoint (spec §5).
+
+        Called once at setup to obtain ``openId`` (= the standard-cloud
+        ``userid``). ``access_token`` is sent as a form body parameter.
+
+        Raises:
+            GreeOAuthError: on network error, non-200, or malformed response.
+        """
         url = f"{self.base_url}{_USERINFO_PATH}"
         try:
             async with self._session.post(

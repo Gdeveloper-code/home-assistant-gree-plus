@@ -537,7 +537,7 @@ class GreeClimateEntity(GreePlusEntity, ClimateEntity):
             return
         try:
             await self.coordinator.async_query_device(self.device.id)
-        except GreeStandardCloudError:
+        except GreeStandardCloudError, HomeAssistantError:
             return
         if self._state is None or self._fan_mode_accepted(requested):
             return

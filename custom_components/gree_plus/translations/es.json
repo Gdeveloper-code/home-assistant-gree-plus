@@ -1,4 +1,15 @@
 {
+  "exceptions": {
+    "authentication_failed": {
+      "message": "La autorización de la cuenta ha caducado o se ha rechazado. Inicia sesión de nuevo para continuar."
+    },
+    "command_failed": {
+      "message": "No se pudo controlar el dispositivo: {message}"
+    },
+    "communication_failed": {
+      "message": "No se pudo conectar con el servicio en la nube. Inténtalo de nuevo más tarde."
+    }
+  },
   "entity": {
     "climate": {
       "air_conditioner": {

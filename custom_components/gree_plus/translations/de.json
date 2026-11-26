@@ -1,4 +1,15 @@
 {
+  "exceptions": {
+    "authentication_failed": {
+      "message": "Die Kontoautorisierung ist abgelaufen oder wurde abgelehnt. Melde dich erneut an, um fortzufahren."
+    },
+    "command_failed": {
+      "message": "Das Gerät konnte nicht gesteuert werden: {message}"
+    },
+    "communication_failed": {
+      "message": "Die Verbindung zum Cloud-Dienst ist fehlgeschlagen. Versuche es später erneut."
+    }
+  },
   "entity": {
     "climate": {
       "air_conditioner": {

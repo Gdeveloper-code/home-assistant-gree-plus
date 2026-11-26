@@ -1,4 +1,15 @@
 {
+  "exceptions": {
+    "authentication_failed": {
+      "message": "Quyền truy cập tài khoản đã hết hạn hoặc bị từ chối. Hãy đăng nhập lại để tiếp tục."
+    },
+    "command_failed": {
+      "message": "Không thể điều khiển thiết bị: {message}"
+    },
+    "communication_failed": {
+      "message": "Không thể kết nối với dịch vụ đám mây. Vui lòng thử lại sau."
+    }
+  },
   "entity": {
     "climate": {
       "air_conditioner": {

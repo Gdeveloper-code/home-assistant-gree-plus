@@ -17,8 +17,11 @@ from datetime import datetime, timedelta
 import logging
 from typing import Any, override
 
+from aiohttp import ClientError
+
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
+from homeassistant.exceptions import ConfigEntryAuthFailed, HomeAssistantError
 from homeassistant.helpers import device_registry as dr, issue_registry as ir
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.storage import Store
@@ -36,6 +39,8 @@ from .const import (
 from .gree_plus_protocol import (
     Device,
     DevState,
+    GreeOAuthAuthenticationError,
+    GreeOAuthError,
     GreeStandardCloudError,
     GROauthControl,
     GRStandardCloud,
@@ -126,6 +131,7 @@ class GRCoordinator(DataUpdateCoordinator[dict[str, DeviceData]]):
             config_entry=config_entry,
         )
         self.config_entry = config_entry
+        self._token_refresh_lock = asyncio.Lock()
         self._oauth = GROauthControl(
             session=async_get_clientsession(hass),
             region=config_entry.data.get(CONF_REGION),
@@ -202,22 +208,34 @@ class GRCoordinator(DataUpdateCoordinator[dict[str, DeviceData]]):
         Refreshes when the access_token is near-expiry or the refresh_token is
         past its rotation age. No-op otherwise.
         """
-        now = dt_util.utcnow()
-        access_expired = (
-            self._access_token_expires_at is None
-            or self._access_token_expires_at - now <= _ACCESS_TOKEN_REFRESH_MARGIN
-        )
-        refresh_stale = (
-            self._refresh_token_issued_at is not None
-            and now - self._refresh_token_issued_at >= _REFRESH_TOKEN_ROTATE_AGE
-        )
-        if not (access_expired or refresh_stale):
-            return
-        await self._do_refresh()
+        async with self._token_refresh_lock:
+            now = dt_util.utcnow()
+            access_expired = (
+                self._access_token_expires_at is None
+                or self._access_token_expires_at - now <= _ACCESS_TOKEN_REFRESH_MARGIN
+            )
+            refresh_stale = (
+                self._refresh_token_issued_at is not None
+                and now - self._refresh_token_issued_at >= _REFRESH_TOKEN_ROTATE_AGE
+            )
+            if not (access_expired or refresh_stale):
+                return
+            await self._do_refresh()
 
     async def _do_refresh(self) -> None:
         """Exchange the refresh_token for a new token pair and persist it."""
-        token = await self._oauth.refresh(self._refresh_token)
+        try:
+            token = await self._oauth.refresh(self._refresh_token)
+        except GreeOAuthAuthenticationError as err:
+            raise ConfigEntryAuthFailed(
+                translation_domain=DOMAIN,
+                translation_key="authentication_failed",
+            ) from err
+        except GreeOAuthError as err:
+            raise UpdateFailed(
+                translation_domain=DOMAIN,
+                translation_key="communication_failed",
+            ) from err
         self._apply_tokens(token)
 
     def _apply_tokens(self, token: TokenInfo) -> None:
@@ -241,29 +259,30 @@ class GRCoordinator(DataUpdateCoordinator[dict[str, DeviceData]]):
 
     async def _call[T](self, func: Callable[..., Awaitable[T]], *args: Any) -> T:
         """Run a cloud call with token gate + 101 safety-net retry."""
-        await self._ensure_token()
         try:
-            return await func(*args)
-        except GreeStandardCloudError as err:
-            if err.code not in AUTH_ERROR_CODES:
-                raise
-            # Auth failed despite local checks (clock skew) → force refresh once.
-            _LOGGER.warning("Auth error %s, refreshing token and retrying", err.code)
+            await self._ensure_token()
+            access_token = self._access_token
             try:
-                await self._do_refresh()
-            except Exception:
-                ir.async_create_issue(
-                    self.hass,
-                    DOMAIN,
-                    "token_refresh_failed",
-                    is_fixable=True,
-                    is_persistent=True,
-                    severity=ir.IssueSeverity.ERROR,
-                    translation_key="token_refresh_failed",
-                    data={"entry_id": self.config_entry.entry_id},
-                )
+                return await func(*args)
+            except GreeStandardCloudError as err:
+                if err.code not in AUTH_ERROR_CODES:
+                    raise
+            async with self._token_refresh_lock:
+                if self._access_token == access_token:
+                    await self._do_refresh()
+            try:
+                return await func(*args)
+            except GreeStandardCloudError as err:
+                if err.code in AUTH_ERROR_CODES:
+                    raise ConfigEntryAuthFailed(
+                        translation_domain=DOMAIN,
+                        translation_key="authentication_failed",
+                    ) from err
                 raise
-            return await func(*args)
+        except ConfigEntryAuthFailed as err:
+            self.async_set_update_error(err)
+            self.config_entry.async_start_reauth(self.hass)
+            raise
 
     @override
     async def _async_update_data(self) -> dict[str, DeviceData]:
@@ -275,7 +294,10 @@ class GRCoordinator(DataUpdateCoordinator[dict[str, DeviceData]]):
             # treat it as an empty list so the stale-device cleanup wipes the
             # devices left by a previous account (or a now-empty account).
             if err.code not in NO_DEVICES_ERROR_CODES:
-                raise
+                raise UpdateFailed(
+                    translation_domain=DOMAIN,
+                    translation_key="communication_failed",
+                ) from err
             devices = []
         device_ids = [d.id for d in devices]
         cur_ids = set(device_ids)
@@ -336,19 +358,34 @@ class GRCoordinator(DataUpdateCoordinator[dict[str, DeviceData]]):
             await self._call(self._cloud.control, device_id, cmd)
         except GreeStandardCloudError as err:
             if err.code in OFFLINE_ERROR_CODES:
-                raise UpdateFailed(
+                raise HomeAssistantError(
                     translation_domain=DOMAIN,
                     translation_key="device_offline",
                     translation_placeholders={"message": str(err)},
                 ) from err
-            raise
+            raise HomeAssistantError(
+                translation_domain=DOMAIN,
+                translation_key="command_failed",
+                translation_placeholders={"message": str(err)},
+            ) from err
+        except (UpdateFailed, ClientError, TimeoutError) as err:
+            raise HomeAssistantError(
+                translation_domain=DOMAIN,
+                translation_key="communication_failed",
+            ) from err
 
-        async def _re_query():
+        async def _re_query() -> None:
             """Background: re-query after device syncs state to cloud."""
             await asyncio.sleep(1)
             try:
                 await self.async_query_device(device_id)
-            except GreeStandardCloudError:
+            except (
+                GreeStandardCloudError,
+                HomeAssistantError,
+                ClientError,
+                TimeoutError,
+            ):
+                _LOGGER.debug("Unable to refresh device state after a command")
                 return
 
         self.hass.async_create_background_task(_re_query(), "gree_plus re-query")

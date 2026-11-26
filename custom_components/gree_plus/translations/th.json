@@ -1,4 +1,15 @@
 {
+  "exceptions": {
+    "authentication_failed": {
+      "message": "การอนุญาตบัญชีหมดอายุหรือถูกปฏิเสธ โปรดเข้าสู่ระบบอีกครั้งเพื่อดำเนินการต่อ"
+    },
+    "command_failed": {
+      "message": "ไม่สามารถควบคุมอุปกรณ์ได้: {message}"
+    },
+    "communication_failed": {
+      "message": "ไม่สามารถเชื่อมต่อกับบริการคลาวด์ได้ โปรดลองอีกครั้งในภายหลัง"
+    }
+  },
   "entity": {
     "climate": {
       "air_conditioner": {

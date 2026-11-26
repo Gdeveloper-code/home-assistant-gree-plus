@@ -112,6 +112,15 @@
     }
   },
   "exceptions": {
+    "authentication_failed": {
+      "message": "账号授权已过期或被拒绝，请重新登录以继续使用。"
+    },
+    "command_failed": {
+      "message": "无法控制设备：{message}"
+    },
+    "communication_failed": {
+      "message": "无法连接云端服务，请稍后重试。"
+    },
     "auto_mode_no_temperature": {
       "message": "该设备在自动模式下不支持调节温度。"
     },
@@ -123,10 +132,6 @@
     }
   },
   "issues": {
-    "token_refresh_failed": {
-      "title": "Token 刷新失败",
-      "description": "Gree Plus 无法刷新你的访问令牌。请重新输入账号凭据以恢复访问。\n\n要修复此问题，请使用集成卡片上的 **重新配置** 选项。"
-    },
     "no_devices": {
       "title": "未发现设备",
       "description": "你的 Gree 账号下未发现兼容设备。请确保你的设备与登录账号相同。"

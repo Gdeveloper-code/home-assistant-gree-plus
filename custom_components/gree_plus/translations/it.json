@@ -1,4 +1,15 @@
 {
+  "exceptions": {
+    "authentication_failed": {
+      "message": "L’autorizzazione dell’account è scaduta o è stata rifiutata. Accedi di nuovo per continuare."
+    },
+    "command_failed": {
+      "message": "Impossibile controllare il dispositivo: {message}"
+    },
+    "communication_failed": {
+      "message": "Impossibile comunicare con il servizio cloud. Riprova più tardi."
+    }
+  },
   "entity": {
     "climate": {
       "air_conditioner": {

@@ -1,4 +1,15 @@
 {
+  "exceptions": {
+    "authentication_failed": {
+      "message": "Otorisasi akun telah kedaluwarsa atau ditolak. Masuk kembali untuk melanjutkan."
+    },
+    "command_failed": {
+      "message": "Tidak dapat mengontrol perangkat: {message}"
+    },
+    "communication_failed": {
+      "message": "Tidak dapat terhubung ke layanan cloud. Coba lagi nanti."
+    }
+  },
   "entity": {
     "climate": {
       "air_conditioner": {

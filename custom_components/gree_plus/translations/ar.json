@@ -1,4 +1,15 @@
 {
+  "exceptions": {
+    "authentication_failed": {
+      "message": "انتهت صلاحية تفويض الحساب أو تم رفضه. سجّل الدخول مجددًا للمتابعة."
+    },
+    "command_failed": {
+      "message": "تعذر التحكم في الجهاز: {message}"
+    },
+    "communication_failed": {
+      "message": "تعذر الاتصال بالخدمة السحابية. حاول مرة أخرى لاحقًا."
+    }
+  },
   "entity": {
     "climate": {
       "air_conditioner": {

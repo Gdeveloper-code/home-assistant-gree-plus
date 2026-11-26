@@ -1,4 +1,15 @@
 {
+  "exceptions": {
+    "authentication_failed": {
+      "message": "アカウントの認証が期限切れか、拒否されました。続行するには再度ログインしてください。"
+    },
+    "command_failed": {
+      "message": "デバイスを操作できませんでした: {message}"
+    },
+    "communication_failed": {
+      "message": "クラウドサービスと通信できません。しばらくしてから再試行してください。"
+    }
+  },
   "entity": {
     "climate": {
       "air_conditioner": {

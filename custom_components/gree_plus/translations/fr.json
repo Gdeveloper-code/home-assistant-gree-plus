@@ -1,4 +1,15 @@
 {
+  "exceptions": {
+    "authentication_failed": {
+      "message": "L’autorisation du compte a expiré ou a été refusée. Reconnectez-vous pour continuer."
+    },
+    "command_failed": {
+      "message": "Impossible de contrôler l’appareil : {message}"
+    },
+    "communication_failed": {
+      "message": "Impossible de communiquer avec le service cloud. Réessayez plus tard."
+    }
+  },
   "entity": {
     "climate": {
       "air_conditioner": {
